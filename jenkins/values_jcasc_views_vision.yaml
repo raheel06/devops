@@ -1,0 +1,55 @@
+controller:
+
+  # Below is the implementation of Jenkins Configuration as Code. Add a key under configScripts for each configuration area,
+  # where each corresponds to a plugin or section of the UI. Each key (prior to | character) is just a label, and can be any value.
+  # Keys are only used to give the section a meaningful name. The only restriction is they may only contain RFC 1123 \ DNS label
+  # characters: lowercase letters, numbers, and hyphens. The keys become the name of a configuration yaml file on the controller in
+  # /var/jenkins_home/casc_configs (by default) and will be processed by the Configuration as Code Plugin. The lines after each |
+  # become the content of the configuration yaml file. The first line after this is a JCasC root element, e.g., jenkins, credentials,
+  # etc. Best reference is https://<jenkins_url>/configuration-as-code/reference. The example below creates a welcome message:
+  JCasC:
+    configScripts:
+    #  welcome-message: |
+    #    jenkins:
+    #      systemMessage: Welcome to our CI\CD server. This Jenkins is configured and managed 'as code'.
+      custom-casc-views: |
+      
+        jenkins:
+          views:
+          - all:
+              name: "all"
+          - dashboard:
+              bottomPortlets:
+              - latestBuilds:
+                  name: "Latest builds"
+                  numBuilds: 50
+              columns:
+              - "status"
+              - "jobName"
+              - "lastSuccess"
+              - "lastFailure"
+              - "lastDuration"
+              includeRegex: ".*"
+              leftPortlets:
+              - statBuilds:
+                  name: "Build statistics"
+              name: "All-Stats"
+              recurse: true
+              rightPortlets:
+              - statSlaves:
+                  name: "Agent statistics"
+          - list:
+              columns:
+              - "status"
+              - "jobName"
+              - "lastSuccess"
+              - "lastFailure"
+              - "lastDuration"
+              jobNames:
+              - "devops-pipeline"
+              name: "devops"
+
+
+#          - envDashboard:
+#              deployHistory: "10"
+#              name: "Deployment"

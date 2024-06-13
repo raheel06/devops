@@ -1,0 +1,41 @@
+controller:
+
+  JCasC:
+    configScripts:
+
+      custom-casc-sonar: |
+      
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - string:
+                  description: "Sonar"
+                  id: "Sonar-API-Token"
+                  scope: GLOBAL
+                  secret: "{Sonar-API-Token}"
+              - string:
+                  description: "sonar.jenkins-webhook"
+                  id: "sonar.webhook"
+                  scope: GLOBAL
+                  secret: "{Sonar-API-Token}"
+
+
+        unclassified:
+          sonarglobalconfiguration:                  # mandatory
+            buildWrapperEnabled: true
+            installations:                           # mandatory
+              - name: "SonarQubeServer"                         # id of the SonarQube configuration - to be used in jobs
+                serverUrl: "{SONAR_URL}"
+                credentialsId: "Sonar-API-Token"       # id of the credentials containing sonar auth token (since 2.9 version)
+                #serverAuthenticationToken: "token"   # for retrocompatibility with versions < 2.9
+                #mojoVersion: "mojoVersion"
+                additionalProperties: "sonar.web.javaOpts =-Xmx8512m -Xms512m -XX:MaxPermSize=1024m\
+        \ / sonar.ce.javaOpts =-Xmx8512m -Xms512m -XX:MaxPermSize=1024m / sonar.search.javaOpts\
+        \ =-Xmx8512m -Xms512m -XX:MaxPermSize=1024m"
+                #additionalAnalysisProperties: "additionalAnalysisProperties"
+                triggers:
+                  skipScmCause: false
+                  skipUpstreamCause: false
+                  #envVar: "envVar"
+

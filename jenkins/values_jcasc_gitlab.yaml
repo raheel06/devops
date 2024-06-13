@@ -1,0 +1,82 @@
+controller:
+
+  # Below is the implementation of Jenkins Configuration as Code. Add a key under configScripts for each configuration area,
+  # where each corresponds to a plugin or section of the UI. Each key (prior to | character) is just a label, and can be any value.
+  # Keys are only used to give the section a meaningful name. The only restriction is they may only contain RFC 1123 \ DNS label
+  # characters: lowercase letters, numbers, and hyphens. The keys become the name of a configuration yaml file on the controller in
+  # /var/jenkins_home/casc_configs (by default) and will be processed by the Configuration as Code Plugin. The lines after each |
+  # become the content of the configuration yaml file. The first line after this is a JCasC root element, e.g., jenkins, credentials,
+  # etc. Best reference is https://<jenkins_url>/configuration-as-code/reference. The example below creates a welcome message:
+  JCasC:
+    configScripts:
+    #  welcome-message: |
+    #    jenkins:
+    #      systemMessage: Welcome to our CI\CD server. This Jenkins is configured and managed 'as code'.
+      custom-casc-gitlab: |
+      
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - usernamePassword:
+                  description: "Gitlab"
+                  id: "Gitlab-User"
+                  password: "{PASSWORD}"
+                  scope: GLOBAL
+                  username: "devops"
+                  usernameSecret: true
+              - gitLabApiTokenImpl:
+                  apiToken: "{TOKEN}"
+                  description: "gitLabApiToken"
+                  id: "Gitlab-API-Token"
+                  scope: GLOBAL
+              - gitlabPersonalAccessToken:
+                  description: "GitLabPersonalAccessToken"
+                  id: "GitLabPersonalAccessToken"
+                  scope: GLOBAL
+                  token: "{TOKEN}"
+
+
+        unclassified:
+            gitLabConnectionConfig:
+              connections:
+              - apiTokenId: "Gitlab-API-Token"
+                clientBuilderId: "autodetect"
+                connectionTimeout: 10
+                ignoreCertificateErrors: false
+                name: "git.domainName"
+                readTimeout: 10
+                url: "https://{GIT_DomainName}"
+              useAuthenticatedEndpoint: true
+            gitLabServers:
+              servers:
+              - credentialsId: "GitLabPersonalAccessToken"
+                manageSystemHooks: true
+                manageWebHooks: true
+                name: "{GIT_DomainName}"
+                serverUrl: "https://{GIT_DomainName}"
+                webhookSecretCredentialsId: "gitLabApiToken"
+            globalLibraries:
+              libraries:
+              - defaultVersion: "main"
+                implicit: true
+                name: "Shared-library-jenkins"
+                retriever:
+                  modernSCM:
+                    scm:
+                      git:
+                        credentialsId: "Gitlab-User"
+                        id: "98320fc7-d70a-44ab-9eeb-7b5e7d743459"
+                        remote: "https://{GIT_DomainName}/devops-projects/shared-libraries-jenkins.git"
+                        traits:
+                        - "gitBranchDiscovery"
+            scmGit:
+                addGitTagAction: false
+                allowSecondFetch: false
+                createAccountBasedOnEmail: false
+                disableGitToolChooser: false
+                globalConfigEmail: "devops@domain.com"
+                globalConfigName: "devops"
+                hideCredentials: false
+                showEntireCommitSummaryInChanges: false
+                useExistingAccountWithSameEmail: false

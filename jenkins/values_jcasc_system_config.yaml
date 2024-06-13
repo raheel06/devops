@@ -1,0 +1,118 @@
+controller:
+
+  # Below is the implementation of Jenkins Configuration as Code. Add a key under configScripts for each configuration area,
+  # where each corresponds to a plugin or section of the UI. Each key (prior to | character) is just a label, and can be any value.
+  # Keys are only used to give the section a meaningful name. The only restriction is they may only contain RFC 1123 \ DNS label
+  # characters: lowercase letters, numbers, and hyphens. The keys become the name of a configuration yaml file on the controller in
+  # /var/jenkins_home/casc_configs (by default) and will be processed by the Configuration as Code Plugin. The lines after each |
+  # become the content of the configuration yaml file. The first line after this is a JCasC root element, e.g., jenkins, credentials,
+  # etc. Best reference is https://<jenkins_url>/configuration-as-code/reference. The example below creates a welcome message:
+  JCasC:
+    configScripts:
+    #  welcome-message: |
+    #    jenkins:
+    #      systemMessage: Welcome to our CI\CD server. This Jenkins is configured and managed 'as code'.
+      custom-casc-system-config: |
+      
+        jenkins:
+          myViewsTabBar: "standard"
+          noUsageStatistics: true
+          primaryView:
+            all:
+              name: "all"
+          viewsTabBar: "countJobs"
+          quietPeriod: 5
+          remotingSecurity:
+            enabled: true
+          scmCheckoutRetryCount: 0
+          labelAtoms:
+            - name: "kubernetes"
+            - name: "linux_deploy"
+            - name: "linux_ibmjdk_1.8"
+            - name: "linux_openjdk_1.8"
+            - name: "linux_openjdk_11"
+            - name: "master"
+
+
+        unclassified:
+          ansiColorBuildWrapper:
+            colorMaps:
+                - black: "#000000"
+                  blackB: "#4C4C4C"
+                  blue: "#1E90FF"
+                  blueB: "#4682B4"
+                  cyan: "#00CDCD"
+                  cyanB: "#00FFFF"
+                  green: "#00CD00"
+                  greenB: "#00FF00"
+                  magenta: "#CD00CD"
+                  magentaB: "#FF00FF"
+                  name: "xterm"
+                  red: "#CD0000"
+                  redB: "#FF0000"
+                  white: "#E5E5E5"
+                  whiteB: "#FFFFFF"
+                  yellow: "#CDCD00"
+                  yellowB: "#FFFF00"
+            globalColorMapName: "xterm"
+          buildMonitorView:
+            permissionToCollectAnonymousUsageStatistics: false
+          configureSystemSection:
+            debug: false
+          prometheusConfiguration:
+            appendParamLabel: false
+            appendStatusLabel: false
+            collectCodeCoverage: true
+            collectDiskUsage: true
+            collectNodeStatus: true
+            collectingMetricsPeriodInSeconds: 120
+            countAbortedBuilds: true
+            countFailedBuilds: true
+            countNotBuiltBuilds: true
+            countSuccessfulBuilds: true
+            countUnstableBuilds: true
+            defaultNamespace: "default"
+            fetchTestResults: true
+            jobAttributeName: "jenkins_job"
+            path: "prometheus"
+            perBuildMetrics: false
+            processingDisabledBuilds: false
+            useAuthenticatedEndpoint: false
+          timestamper:
+            allPipelines: true
+            elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
+            systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
+
+
+
+
+
+
+
+
+
+
+
+
+
+#          primaryView:
+#            dashboard:
+#              bottomPortlets:
+#              - latestBuilds:
+#                  name: "Latest builds"
+#                  numBuilds: 50
+#              columns:
+#              - "status"
+#              - "jobName"
+#              - "lastSuccess"
+#              - "lastFailure"
+#              - "lastDuration"
+#              includeRegex: ".*"
+#              leftPortlets:
+#              - statBuilds:
+#                  name: "Build statistics"
+#              name: "All-Stats"
+#              recurse: true
+#              rightPortlets:
+#              - statSlaves:
+#                  name: "Agent statistics"

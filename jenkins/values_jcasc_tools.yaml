@@ -1,0 +1,223 @@
+controller:
+  JCasC:
+    configScripts:
+
+      custom-casc-tools: |
+
+          tool:
+            ansible:
+              installations:
+              - home: "/usr/bin/"
+                name: "ansible-devops"
+                properties:
+                - installSource:
+                    installers:
+                    - command:
+                        command: |-
+                          sudo apt update
+                          sudo apt install software-properties-common
+                          sudo add-apt-repository --yes --update ppa:ansible/ansible
+                          sudo apt install ansible
+                        toolHome: "/usr/bin/"
+            git:
+              installations:
+              - home: "git"
+                name: "Default"
+            gradle:
+              installations:
+              - name: "gradle-standard"
+                properties:
+                - installSource:
+                    installers:
+                    - gradleInstaller:
+                        id: "6.4"
+              - name: "gradle-7.5"
+                properties:
+                - installSource:
+                    installers:
+                    - gradleInstaller:
+                        id: "7.5"
+            jdk:
+              installations:
+              - name: "OpenJDK1.8.x"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk8u352-b08"
+              - name: "OpenJDK11.0.2"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk8u345-b01"
+              - name: "OpenJDK1.8"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk8u352-b08"
+              - name: "OpenJDK11"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk-11.0.16.1+1"
+              - name: "OpenJDK11New"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk8u345-b01"
+              - name: "ibmjdk1.8"
+                properties:
+                - installSource:
+                    installers:
+                    - command:
+                        command: |
+                          export JAVA_HOME=/opt/ibmjdk/java_1.8_64
+                          export PATH=$JAVA_HOME/bin:$PATH
+                        label: "linux_ibmjdk_1.8"
+                        toolHome: "$JAVA_HOME"
+              - name: "OpenJDK11015"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk-11.0.15+10"
+              - name: "OpenJDK11017"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk-11.0.17+8"
+              - name: "OpenJDK17011"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk-17.0.11+9"
+              - name: "OpenJDK1102"
+                properties:
+                - installSource:
+                    installers:
+                    - adoptOpenJdkInstaller:
+                        id: "jdk-11.0.20.1+1"
+            maven:
+              installations:
+              - name: "maven-standard"
+                properties:
+                - installSource:
+                    installers:
+                    - maven:
+                        id: "3.6.3"
+              - name: "maven-3.6.3"
+                properties:
+                - installSource:
+                    installers:
+                    - maven:
+                        id: "3.6.3"
+              - name: "maven-3.6.2"
+                properties:
+                - installSource:
+                    installers:
+                    - maven:
+                        id: "3.6.2"
+            mavenGlobalConfig:
+              globalSettingsProvider: "standard"
+              settingsProvider: "standard"
+            nodejs:
+              installations:
+              - name: "nodejs-v18.13.0"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "20.9.0"
+                        npmPackagesRefreshHours: 72
+              - name: "nodejs-v16.10"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "16.10.0"
+                        npmPackages: "newman"
+                        npmPackagesRefreshHours: 72
+              - name: "nodejs-13.6.0"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "13.6.0"
+                        npmPackages: "newman"
+                        npmPackagesRefreshHours: 72
+              - name: "nodejs-standard"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "15.2.1"
+                        npmPackages: "newman"
+                        npmPackagesRefreshHours: 72
+              - name: "nodejs-v16.13.0"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "16.13.0"
+                        npmPackages: "newman"
+                        npmPackagesRefreshHours: 72
+              - name: "nodejs-v10.16.0"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "10.16.0"
+                        npmPackagesRefreshHours: 72
+              - name: "nodejs-v16.14.0"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "16.14.0"
+                        npmPackagesRefreshHours: 72
+              - name: "nodejs-v18.13.0"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "18.13.0"
+                        npmPackagesRefreshHours: 72
+              - name: "nodejs-v16.17.0"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "16.17.0"
+                        npmPackagesRefreshHours: 72
+            pipelineMaven:
+              triggerDownstreamUponResultAborted: false
+              triggerDownstreamUponResultFailure: false
+              triggerDownstreamUponResultNotBuilt: false
+              triggerDownstreamUponResultSuccess: true
+              triggerDownstreamUponResultUnstable: false
+            powerShellInstallation:
+              installations:
+              - home: "powershell.exe"
+                name: "DefaultWindows"
+              - home: "pwsh"
+                name: "DefaultLinux"
+            sonarRunnerInstallation:
+              installations:
+              - name: "sonarqube-scanner-standard"
+                properties:
+                - installSource:
+                    installers:
+                    - sonarRunnerInstaller:
+                        id: "4.3.0.2102"
+              - name: "Sonar-4.2"
+                properties:
+                - installSource:
+                    installers:
+                    - sonarRunnerInstaller:
+                        id: "4.2.0.1873"

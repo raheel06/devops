@@ -1,0 +1,48 @@
+controller:
+
+  JCasC:
+    configScripts:
+    #  welcome-message: |
+    #    jenkins:
+    #      systemMessage: Welcome to our CI\CD server. This Jenkins is configured and managed 'as code'.
+      custom-casc-jira: |
+      
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - usernamePassword:
+                  description: "jira-login-service-account"
+                  id: "jira-login"
+                  password: "{Jira_Password}"
+                  scope: GLOBAL
+                  username: "devops"
+                  usernameSecret: true
+
+
+        unclassified:
+            jiraStepsConfig:
+              sites:
+              - loginType: "BASIC"
+                name: "JIRA"
+                password: "{Jira_Password}"
+                readTimeout: 60000
+                secret: "{}"
+                timeout: 60000
+                token: "{}"
+                url: "https://jira.domain.com"
+                userName: "devops"
+
+
+#            jiraTriggerGlobalConfiguration:
+#              jiraCommentReply: true
+#              jiraPassword: "{}"
+#              jiraRootUrl: "https://jira.domain.com"
+#              jiraUsername: "devops"
+
+#          jiraGlobalConfiguration:
+#              sites:
+#              - credentialsId: "jira-login"
+#                readTimeout: 60
+#                timeout: 30
+#                url: "https://jira.domain.com"

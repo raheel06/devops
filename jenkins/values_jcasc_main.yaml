@@ -1,0 +1,156 @@
+controller:
+
+  # Below is the implementation of Jenkins Configuration as Code. Add a key under configScripts for each configuration area,
+  # where each corresponds to a plugin or section of the UI. Each key (prior to | character) is just a label, and can be any value.
+  # Keys are only used to give the section a meaningful name. The only restriction is they may only contain RFC 1123 \ DNS label
+  # characters: lowercase letters, numbers, and hyphens. The keys become the name of a configuration yaml file on the controller in
+  # /var/jenkins_home/casc_configs (by default) and will be processed by the Configuration as Code Plugin. The lines after each |
+  # become the content of the configuration yaml file. The first line after this is a JCasC root element, e.g., jenkins, credentials,
+  # etc. Best reference is https://<jenkins_url>/configuration-as-code/reference. The example below creates a welcome message:
+  JCasC:
+    # -- Enables default Jenkins configuration via configuration as code plugin
+    defaultConfig: true
+
+    # If true, the init container deletes all the plugin config files and Jenkins Config as Code overwrites any existing configuration
+    # -- Whether Jenkins Config as Code should overwrite any existing configuration
+    overwriteConfiguration: false
+    # -- Remote URLs for configuration files.
+    configUrls: []
+    # - https://acme.org/jenkins.yaml
+    # -- List of Jenkins Config as Code scripts
+    configScripts: {}
+    #  welcome-message: |
+    #    jenkins:
+    #      systemMessage: Welcome to our CI\CD server. This Jenkins is configured and managed 'as code'.
+
+    # Allows adding to the top-level security JCasC section. For legacy purposes, by default, the chart includes apiToken configurations
+    # -- Jenkins Config as Code security-section
+    security:
+      apiToken:
+        creationOfLegacyTokenEnabled: false
+        tokenGenerationOnCreationEnabled: false
+        usageStatisticsEnabled: false
+      scriptApproval:
+        approvedSignatures:
+        - "field java.lang.String value"
+        - "method com.michelin.cio.hudson.plugins.rolestrategy.Role getName"
+        - "method com.michelin.cio.hudson.plugins.rolestrategy.RoleBasedAuthorizationStrategy\
+          \ getRoleMaps"
+        - "method com.michelin.cio.hudson.plugins.rolestrategy.RoleMap getGrantedRoles"
+        - "method groovy.lang.GroovyObject invokeMethod java.lang.String java.lang.Object"
+        - "method hudson.model.Executor interrupt hudson.model.Result jenkins.model.CauseOfInterruption[]"
+        - "method hudson.model.ItemGroup getItem java.lang.String"
+        - "method hudson.model.Job getBuilds"
+        - "method hudson.model.Run getExecutor"
+        - "method hudson.model.Run getNumber"
+        - "method java.lang.String join java.lang.CharSequence java.lang.CharSequence[]"
+        - "method jenkins.model.Jenkins getAuthorizationStrategy"
+        - "method org.jenkinsci.plugins.workflow.cps.CpsScript $build"
+        - "new hudson.model.BooleanParameterValue java.lang.String boolean"
+        - "new java.util.ArrayList"
+        - "new java.util.GregorianCalendar java.util.TimeZone"
+        - "new jenkins.model.CauseOfInterruption$UserInterruption java.lang.String"
+        - "staticMethod hudson.model.Hudson getInstance"
+        - "method hudson.PluginManager getPlugin java.lang.String"
+        - "method jenkins.model.Jenkins getPluginManager"
+        - "staticMethod jenkins.model.Jenkins getInstance"
+
+
+
+    # Ignored if securityRealm is defined in controller.JCasC.configScripts
+    # -- Jenkins Config as Code Security Realm-section
+
+# For Production Active Directory
+#    securityRealm: |-
+#      activeDirectory:
+#        customDomain: true
+#        domains:
+#        - name: "domain.com"
+#          servers: "{AD_IP:PORT}"
+#          bindName: "CN={AD_USER_TO_SEARCH},OU=ServiceAccounts,OU={OU1},DC={DC1},DC={DC2}"
+#          bindPassword: "{AD_USER_TO_SEARCH_Password}"
+#          tlsConfiguration: TRUST_ALL_CERTIFICATES
+#        groupLookupStrategy: AUTO
+#        removeIrrelevantGroups: false
+#        cache:
+#          size: 500
+#          ttl: 600
+#        startTls: true
+#        internalUsersDatabase:
+#          jenkinsInternalUser: "jenkins"
+
+#For Test system
+    securityRealm: |-
+    
+      local:
+        allowsSignup: false
+        enableCaptcha: false
+        users:
+        - id: "${chart-admin-username}"
+          name: "Jenkins Admin"
+          password: "${chart-admin-password}"
+
+    # Ignored if authorizationStrategy is defined in controller.JCasC.configScripts
+    # -- Jenkins Config as Code Authorization Strategy-section
+    #authorizationStrategy: |-
+    #  loggedInUsersCanDoAnything:
+    #    allowAnonymousRead: true
+    authorizationStrategy: |-
+    
+      roleBased:
+        roles:
+          global:
+          - name: "admin"
+            description: "Jenkins administrators"
+            permissions:
+            - "Overall/Administer"
+            entries:
+            - user: "admin"
+            - user: "devops"
+
+          - name: "readonly"
+            description: "Read-only users"
+            permissions:
+            - "Overall/Read"
+            - "Job/Read"
+            - "Job/Workspace"
+            - "View/Read"
+            entries:
+            - user: "anonymous"
+
+          - name: "DevOps"
+            entries:
+            - group: "Group-DevOps"
+            permissions:
+            - "Overall/Administer"
+
+          - name: "Developer"
+            description: "development team members"
+            permissions:
+            - "Job/Build"
+            - "Job/Cancel"
+            - "Overall/Read"
+            - "Job/Read"
+            - "Job/Workspace"
+            - "Job/Discover"
+            - "Job/Discover"
+            - "View/Read"
+            entries:
+            - user: "devops"
+
+
+          items:
+          - name: "qa-uat-deploy"
+            pattern: ".*-deploy.*(UAT|QMG)"
+            permissions:
+            - "Job/Build"
+            - "Job/Cancel"
+            - "Overall/Read"
+            - "Job/Read"
+            - "Job/Workspace"
+            - "Job/Discover"
+            - "Job/Discover"
+            - "View/Read"
+            entries:
+            - user: "devops"
+

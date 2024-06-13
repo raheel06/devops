@@ -1,0 +1,42 @@
+controller:
+  JCasC:
+    configScripts:
+    #  welcome-message: |
+    #    jenkins:
+    #      systemMessage: Welcome to our CI\CD server. This Jenkins is configured and managed 'as code'.
+      custom-casc-emails: |
+      
+        unclassified:
+          mailer:
+              authentication:
+                username: "devops@domain.com"
+                password: "{password}"
+              charset: "UTF-8"
+              defaultSuffix: "@domain.com"
+              smtpHost: "{IP_ADDRESS}"
+              smtpPort: "{PORT}"
+              useSsl: false
+              useTls: false
+          email-ext:
+              adminRequiredForTemplateTesting: false
+              allowUnregisteredEnabled: false
+              charset: "UTF-8"
+              debugMode: false
+              defaultBody: |-
+                $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+                Check console output at $BUILD_URL to view the results.
+              defaultContentType: "text/html"
+              defaultRecipients: "devops@domain.com"
+              defaultReplyTo: "devops@domain.com"
+              defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+              defaultSuffix: "@domain.com"
+              defaultTriggerIds:
+              - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
+              mailAccount:
+                smtpHost: "{IP_ADDRESS}"
+                credentialsId: "devops"
+              maxAttachmentSize: -1
+              maxAttachmentSizeMb: -1
+              precedenceBulk: false
+              watchingEnabled: false

@@ -1,0 +1,22 @@
+controller:
+
+  JCasC:
+    configScripts:
+
+      custom-casc-nodes: |
+      
+        jenkins:
+          nodes:
+          - permanent:
+              labelString: "linux"
+              launcher:
+                ssh:
+                  credentialsId: "ssh"
+                  host: "{Agent_IP}"
+                  port: 22
+                  sshHostKeyVerificationStrategy: "knownHostsFileKeyVerificationStrategy"
+              name: "linux-agent"
+              nodeDescription: "Linux Agent ({Agent_IP})"
+              numExecutors: 3
+              remoteFS: "/opt/kube-jenkins"
+              retentionStrategy: "always"
