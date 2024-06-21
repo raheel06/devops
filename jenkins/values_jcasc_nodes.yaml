@@ -18,5 +18,5 @@ controller:
               name: "linux-agent"
               nodeDescription: "Linux Agent ({Agent_IP})"
               numExecutors: 3
-              remoteFS: "/opt/kube-jenkins"
+              remoteFS: "/opt/kube-{{.Values.nameOverride}}"
               retentionStrategy: "always"

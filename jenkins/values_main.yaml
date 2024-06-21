@@ -256,9 +256,9 @@ controller:
         # -- Set the Pod's HTTP port to use for the startup probe
         port: http
       # -- Set the time interval between two startup probes executions in seconds
-      periodSeconds: 10
+      periodSeconds: 60
       # -- Set the timeout for the startup probe in seconds
-      timeoutSeconds: 5
+      timeoutSeconds: 60
 
     livenessProbe:
       # -- Set the failure threshold for the liveness probe
@@ -269,14 +269,14 @@ controller:
         # -- Set the Pod's HTTP port to use for the liveness probe
         port: http
       # -- Set the time interval between two liveness probes executions in seconds
-      periodSeconds: 10
+      periodSeconds: 60
       # -- Set the timeout for the liveness probe in seconds
-      timeoutSeconds: 5
+      timeoutSeconds: 60
 
       # If Startup Probe is not supported on your Kubernetes cluster, you might want to use "initialDelaySeconds" instead.
       # It delays the initial liveness probe while Jenkins is starting
       # -- Set the initial delay for the liveness probe in seconds
-      initialDelaySeconds:
+      initialDelaySeconds: 60
 
     readinessProbe:
       # -- Set the failure threshold for the readiness probe
@@ -289,12 +289,12 @@ controller:
       # -- Set the time interval between two readiness probes executions in seconds
       periodSeconds: 10
       # -- Set the timeout for the readiness probe in seconds
-      timeoutSeconds: 5
+      timeoutSeconds: 60
 
       # If Startup Probe is not supported on your Kubernetes cluster, you might want to use "initialDelaySeconds" instead.
       # It delays the initial readiness probe while Jenkins is starting
       # -- Set the initial delay for the readiness probe in seconds
-      initialDelaySeconds:
+      initialDelaySeconds: 3
 
   # PodDisruptionBudget config
   podDisruptionBudget:
@@ -1178,7 +1178,7 @@ additionalClouds: {}
 
 persistence:
   # -- Enable the use of a Jenkins PVC
-  enabled: false
+  enabled: true
 
   # A manually managed Persistent Volume and Claim
   # Requires persistence.enabled: true
@@ -1192,7 +1192,7 @@ persistence:
   # If undefined (the default) or set to null, no storageClassName spec is
   #   set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS & OpenStack)
   # -- Storage class for the PVC
-  storageClass:
+  storageClass: local-storage
   # -- Annotations for the PVC
   annotations: {}
   # -- Labels for the PVC

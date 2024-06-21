@@ -1,0 +1,25 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: jenkins-devops-pv
+  namespace: devops-tools
+  labels:
+    type: local
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  local:
+    path: /home/devops/jenkins/
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - kubemaster
