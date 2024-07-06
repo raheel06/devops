@@ -2,11 +2,11 @@ kind: PersistentVolume
 apiVersion: v1
 metadata:
   name: jenkins-devops-pv
-  namespace: devops-tools
+  namespace: devops
   labels:
     type: local
 spec:
-  storageClassName: local-storage
+  storageClassName: nfs-client
   capacity:
     storage: 10Gi
   accessModes:

@@ -1,50 +1,83 @@
+
+
+## Jenkins Deployment
+
+### Jenkins deployment with helm
 export KUBECONFIG=/etc/kubernetes/admin.conf
+> kubectl create namespace devops
 
-## Repo Setup
+------------
 
-helm repo list
-helm repo add jenkinsci https://charts.jenkins.io/
-helm repo update	//to get newer versions
-helm install devops-jenkins jenkinsci/jenkins --version 5.3.1 -n devops-tools
-helm uninstall devops-jenkins jenkins/jenkins -n devops-tools
+#### helm repo Installation
+`helm repo list`
+`helm repo add jenkinsci https://charts.jenkins.io/`
+`helm repo update`
 
-
-## create pv and storage class
-kubectl apply -f jenkins-storage-class.yaml
-kubectl apply -f jenkins-vol.yaml
+Examples:
+> helm install devops-jenkins jenkinsci/jenkins --version 5.3.1 -n devops
+> helm uninstall devops-jenkins jenkins/jenkins -n devops
 
 
-## install jenkins
+#### create pv and storage class
+`kubectl apply -f jenkins-storage-class.yaml`
+`kubectl apply -f jenkins-vol.yaml`
 
-helm install devops-jenkins jenkinsci/jenkins --version 5.3.1 -f values_jenkins.yaml 
--f values_main.yaml -f values_plugins.yaml \
--f values_jcasc_main.yaml -f values_jcasc_credentials.yaml -f values_jcasc_system_config.yaml \
+
+#### Installation & Upgrade DevOps Jenkins
+`helm install devops-jenkins jenkinsci/jenkins --version 5.3.1 \
+-f values_jenkins_devops.yaml -f values_jcasc_roles_devops.yaml -f values_jcasc_views_devops.yaml \
+-f values_main.yaml -f values_plugins.yaml -f values_jcasc_main.yaml -f values_jcasc_credentials.yaml \
+-f values_jcasc_system_config.yaml -f values_jcasc_tools.yaml -f values_jcasc_nodes.yaml \
 -f values_jcasc_sonar.yaml -f values_jcasc_jira.yaml -f values_jcasc_gitlab.yaml -f values_jcasc_emails.yaml \
--f values_jcasc_nodes.yaml -f values_jcasc_tools.yaml -f values_jcasc_views.yaml \
--n devops-tools
+-n devops`
 
-## upgrade jenkins
 
-helm upgrade devops-jenkins jenkinsci/jenkins -f values_jenkins.yaml \
--f values_main.yaml -f values_plugins.yaml \
--f values_jcasc_main.yaml -f values_jcasc_credentials.yaml -f values_jcasc_system_config.yaml \
+##### Upgrade without plugins installation
+`helm upgrade devops-jenkins jenkinsci/jenkins 
+-f values_jenkins_devops.yaml -f values_jcasc_roles_devops.yaml -f values_jcasc_views_devops.yaml \
+-f values_main.yaml -f values_plugins.yaml -f values_jcasc_main.yaml -f values_jcasc_credentials.yaml \
+-f values_jcasc_system_config.yaml -f values_jcasc_tools.yaml -f values_jcasc_nodes.yaml \
 -f values_jcasc_sonar.yaml -f values_jcasc_jira.yaml -f values_jcasc_gitlab.yaml -f values_jcasc_emails.yaml \
--f values_jcasc_nodes.yaml -f values_jcasc_tools.yaml -f values_jcasc_views.yaml \
- --recreate-pods \
--n devops-tools
+--atomic --timeout 15m --debug --recreate-pods 
+-n devops`
+
+##### Upgrade with plugins installation
+`helm upgrade devops-jenkins jenkinsci/jenkins 
+-f values_jenkins_devops.yaml -f values_jcasc_roles_devops.yaml -f values_jcasc_views_devops.yaml \
+-f values_main.yaml -f values_plugins.yaml -f values_jcasc_main.yaml -f values_jcasc_credentials.yaml \
+-f values_jcasc_system_config.yaml -f values_jcasc_tools.yaml -f values_jcasc_nodes.yaml \
+-f values_jcasc_sonar.yaml -f values_jcasc_jira.yaml -f values_jcasc_gitlab.yaml -f values_jcasc_emails.yaml \
+--atomic --timeout 20m --debug --recreate-pods controller.initializeOnce=false 
+-n devops`
 
 
-## verify kubernetes installation jenkins
+##### Rollback upgrade
+`helm history devops-jenkins`
+`helm rollback devops-jenkins 1 -n devops`
+
+> Note: 1 is a release number
+
+
+##### Uninstall Jenkins
+`helm uninstall devops-jenkins jenkinsci/jenkins -n devops`
+
+
+------------
+
+
+#### Commands to verify deployments
+
+helm ls -a -n devops
+helm list --all-namespaces
 
 kubectl get all  --all-namespaces
 kubectl get pods --all-namespaces
 
-kubectl get pods  -n devops-tools
-kubectl get all  -n devops-tools
-kubectl get all,pv,pvc  -n devops-tools
+kubectl get pods  -n devops
+kubectl get all  -n devops
+kubectl get all,pv,pvc  -n devops
 
-kubectl -n devops-tools describe pod devops-jenkins-0
-kubectl -n devops-tools logs devops-jenkins-0
-kubectl -n devops-tools logs devops-jenkins-0 -f
-
+kubectl -n devops describe pod devops-jenkins-0
+kubectl -n devops logs devops-jenkins-0
+kubectl -n devops logs devops-jenkins-0 -f
 

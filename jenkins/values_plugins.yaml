@@ -4,13 +4,6 @@
 # name: value
 
 controller:
-  # Plugins will be installed during Jenkins controller start
-  # -- List of Jenkins plugins to install. If you don't want to install plugins, set it to `false`
-  installPlugins:
-    - kubernetes:4238.v41b_3ef14a_5d8
-    - workflow-aggregator:596.v8c21c963d92d
-    - git:5.2.2
-    - configuration-as-code:1810.v9b_c30a_249a_4c
 
   # If set to false, Jenkins will download the minimum required version of all dependencies.
   # -- Download the minimum required version or latest version of all dependencies
@@ -18,6 +11,28 @@ controller:
 
   # -- Set to true to download the latest version of any plugin that is requested to have the latest version
   installLatestSpecifiedPlugins: false
+
+  # Without this; whenever the controller gets restarted (Evicted, etc.) it will fetch plugin updates that have the potential to cause breakage.
+  # Note that for this to work, `persistence.enabled` needs to be set to `true`
+  # -- Initialize only on first installation. Ensures plugins do not get updated inadvertently. Requires `persistence.enabled` to be set to `true`
+  initializeOnce: true
+
+  # Enable to always override the installed plugins with the values of 'controller.installPlugins' on upgrade or redeployment.
+  # -- Overwrite installed plugins on start
+  overwritePlugins: true
+
+  # Configures if plugins bundled with `controller.image` should be overwritten with the values of 'controller.installPlugins' on upgrade or redeployment.
+  # -- Overwrite plugins that are already installed in the controller image
+  overwritePluginsFromImage: true
+
+  # Plugins will be installed during Jenkins controller start
+  # -- List of Jenkins plugins to install. If you don't want to install plugins, set it to `false`
+  installPlugins:
+    - kubernetes:4250.v93f47a_8e67b_f
+    - workflow-aggregator:596.v8c21c963d92d
+    - git:5.2.2
+    - configuration-as-code:1810.v9b_c30a_249a_4c
+
 
   # -- List of plugins to install in addition to those listed in controller.installPlugins
   additionalPlugins:
@@ -29,28 +44,37 @@ controller:
     - build-monitor-plugin:1.14-883.vf620a_44eb_ec1
     - basic-branch-build-strategies:81.v05e333931c7d
     - cucumber-reports:5.8.1
-    - credentials:1337.v60b_d7b_c7b_c9f
+    - credentials:1344.v5a_3f65a_1e173
     - countjobs-viewstabbar:1.0.1
     - config-file-provider:973.vb_a_80ecb_9a_4d0
     - copyartifact:722.v0662a_9b_e22a_c
     - cloudbees-disk-usage-simple:203.v3f46a_7462b_1a_
-    - docker-workflow:580.vc0c340686b_54
+    - credentials-binding:677.vdc9d38cb_254d
     - dashboard-view:2.508.va_74654f026d1
+    - deployit-plugin:23.2.0
+    - docker-workflow:580.vc0c340686b_54
     - email-ext:1814.v404722f34263
     - file-operations:214.v2e7dc7f25757
     - gitlab-plugin:1.8.1
     - gitlab-branch-source:704.vc7f1202d7e14
     - gradle:2.12
+    - hp-application-automation-tools-plugin:24.2
     - jira-steps:2.0.165.v8846cf59f3db
     - jobConfigHistory:1229.v3039470161a_d
     - jdk-tool:73.vddf737284550
     - log-parser:2.3.4
+    - maven-plugin:3.23
     - micro-focus-performance-center-integration:1.1.7
     - multibranch-build-strategy-extension:51.v88f14e2a_4075
     - nexus-artifact-uploader:2.14
     - nodejs:1.6.1
-    - pipeline-graph-view:287.v3ef017b_780d5
-    - pipeline-maven:1419.v89b_ec7a_c8b_c5
+    - pipeline-build-step:540.vb_e8849e1a_b_d8
+    - pipeline-graph-view:304.va_f2a_16b_e4964
+    - pipeline-maven:1421.v610fa_b_e2d60e
+    - pipeline-model-definition:2.2198.v41dd8ef6dd56
+    - pipeline-stage-step:312.v8cd10304c27a_
+    - pipeline-stage-view:2.34
+    - pipeline-utility-steps:2.17.0
     - powershell:2.1
     - prometheus:773.v3b_62d8178eec
     - qmetry-for-jira-test-management:1.12
@@ -58,21 +82,8 @@ controller:
     - rebuild:332.va_1ee476d8f6d
     - role-strategy:727.vd344b_eec783d
     - sonar:2.17.2
-    - ssh-slaves:2.968.v6f8823c91de4
+    - ssh-slaves:2.973.v0fa_8c0dea_f9f
     - timestamper:1.27
-    - deployit-plugin:23.2.0
-
-
-
-  # Without this; whenever the controller gets restarted (Evicted, etc.) it will fetch plugin updates that have the potential to cause breakage.
-  # Note that for this to work, `persistence.enabled` needs to be set to `true`
-  # -- Initialize only on first installation. Ensures plugins do not get updated inadvertently. Requires `persistence.enabled` to be set to `true`
-  initializeOnce: false
-
-  # Enable to always override the installed plugins with the values of 'controller.installPlugins' on upgrade or redeployment.
-  # -- Overwrite installed plugins on start
-  overwritePlugins: false
-
-  # Configures if plugins bundled with `controller.image` should be overwritten with the values of 'controller.installPlugins' on upgrade or redeployment.
-  # -- Overwrite plugins that are already installed in the controller image
-  overwritePluginsFromImage: true
+    - workflow-basic-steps:1058.vcb_fc1e3a_21a_9
+    - workflow-cps:3903.v48a_8836749e9
+    - xray-connector:2.6.1

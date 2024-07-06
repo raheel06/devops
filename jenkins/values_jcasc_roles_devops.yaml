@@ -1,0 +1,75 @@
+controller:
+  JCasC:
+    authorizationStrategy: |-
+      roleBased:
+        roles:
+          global:
+          - name: "admin"
+            description: "Jenkins administrators"
+            permissions:
+            - "Overall/Administer"
+            entries:
+            - user: "admin"
+            - user: "devops"
+
+          - name: "DevOps"
+            entries:
+            - group: "DevOps"
+            permissions:
+            - "Overall/Administer"
+
+          - name: "readonly"
+            description: "Read-only users"
+            permissions:
+            - "Overall/Read"
+            - "Job/Read"
+            - "Job/Workspace"
+            - "View/Read"
+            entries:
+            - user: "anonymous"
+
+
+
+          - name: "Developer"
+            description: "development team members"
+            permissions:
+            - "Job/Build"
+            - "Job/Cancel"
+            - "Overall/Read"
+            - "Job/Read"
+            - "Job/Workspace"
+            - "Job/Discover"
+            - "Job/Discover"
+            - "View/Read"
+            entries:
+            - user: "user.name"
+            - user: "devops"
+
+          items:
+          - name: "testing"
+            pattern: "testing.*||testing-.*"
+            permissions:
+            - "Job/Build"
+            - "Job/Cancel"
+            - "Overall/Read"
+            - "Job/Read"
+            - "Job/Workspace"
+            - "Job/Discover"
+            - "View/Read"
+            entries:
+            - user: "user.name"
+
+          - name: "qa-uat-deploy"
+            pattern: ".*-deploy.*(UAT|QMG)"
+            permissions:
+            - "Job/Build"
+            - "Job/Cancel"
+            - "Overall/Read"
+            - "Job/Read"
+            - "Job/Workspace"
+            - "Job/Discover"
+            - "Job/Discover"
+            - "View/Read"
+            entries:
+            - user: "devops"
+

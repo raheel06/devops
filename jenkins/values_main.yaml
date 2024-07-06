@@ -7,13 +7,13 @@
 # See templates/_helpers.tpl
 # -- Override the resource name prefix
 # @default -- `Chart.Name`
-#nameOverride: "jenkins"
+#nameOverride: "vision-jenkins"
 # -- Override the full resource names
 # @default -- `jenkins-(release-name)` or `jenkins` if the release-name is `jenkins`
 fullnameOverride:
 # -- Override the deployment namespace
 # @default -- `Release.Namespace`
-namespaceOverride: "devops-tools"
+namespaceOverride: "devops"
 
 # For FQDN resolving of the controller service. Change this value to match your existing configuration.
 # ref: https://github.com/kubernetes/dns/blob/master/docs/specification.md
@@ -59,7 +59,7 @@ controller:
   disableRememberMe: false
 
   # -- Set Number of executors
-  numExecutors: 3
+  numExecutors: 5
 
   # -- Sets the executor mode of the Jenkins node. Possible values are "NORMAL" or "EXCLUSIVE"
   executorMode: "NORMAL"
@@ -78,7 +78,7 @@ controller:
     username: "admin"
     # -- Admin password created as a secret if `controller.admin.createSecret` is true
     # @default -- <random password>
-    password: "admin@950devops"
+    password: "admin@1234"
 
     # -- The key in the existing admin secret containing the username
     userKey: jenkins-admin-user
@@ -92,7 +92,8 @@ controller:
 
     # -- The name of an existing secret containing the admin credentials
     existingSecret: ""
-
+  # -- Email address for the administrator of the Jenkins instance
+  #jenkinsAdminEmail: "devops@domain.com"
 
   # This value should not be changed unless you use your custom image of jenkins or any derived from.
   # If you want to use Cloudbees Jenkins Distribution docker, you should set jenkinsHome: "/var/cloudbees-jenkins-distribution"
@@ -117,7 +118,7 @@ controller:
       memory: "256Mi"
     limits:
       cpu: "2000m"
-      memory: "4096Mi"
+      memory: "6Gi"
 
   # Share process namespace to allow sidecar containers to interact with processes in other containers in the same pod
   shareProcessNamespace: false
@@ -146,25 +147,35 @@ controller:
   containerEnvFrom: []
 
   # -- Environment variables for Jenkins Container
-  containerEnv: []
-  #   - name: http_proxy
-  #     value: "http://192.168.64.1:3128"
+  containerEnv: 
+    - name: JAVA_TOOL_OPTIONS
+      value: "-Dfile.encoding=UTF-8"
+
+  # you need to create a secret with this name and put the ssh private key there
+    - name: SSH_PRIVATE_KEY
+      valueFrom:
+        secretKeyRef:
+          name: ssh-agent-key
+          key: ssh-key
+
+    # - name: http_proxy
+    #   value: "http://192.168.64.1:3128"
 
   # Set min/max heap here if needed with "-Xms512m -Xmx512m"
   # -- Append to `JAVA_OPTS` env var
   javaOpts:
   # -- Append to `JENKINS_OPTS` env var
-  jenkinsOpts:
+  jenkinsOpts: "--sessionTimeout=5 --sessionEviction=1800"
 
   # If you are using the ingress definitions provided by this chart via the `controller.ingress` block,
   # the configured hostname will be the ingress hostname starting with `https://`
   # or `http://` depending on the `tls` configuration.
   # The Protocol can be overwritten by specifying `controller.jenkinsUrlProtocol`.
   # -- Set protocol for Jenkins URL; `https` if `controller.ingress.tls`, `http` otherwise
-  jenkinsUrlProtocol:
+  jenkinsUrlProtocol: https
 
   # -- Set Jenkins URL if you are not using the ingress definitions provided by the chart
-#  jenkinsUrl:
+  jenkinsUrl:
 
   # If you set this prefix and use ingress controller, then you might want to set the ingress path below
   # I.e., "/jenkins"
@@ -210,7 +221,7 @@ controller:
   # For minikube, set this to NodePort, elsewhere uses LoadBalancer
   # Use ClusterIP if your setup includes ingress controller
   # -- k8s service type
-  serviceType: NodePort
+  # serviceType: LoadBalancer
 
   # -- k8s service clusterIP. Only used if serviceType is ClusterIP
   clusterIp:
@@ -256,9 +267,9 @@ controller:
         # -- Set the Pod's HTTP port to use for the startup probe
         port: http
       # -- Set the time interval between two startup probes executions in seconds
-      periodSeconds: 60
+      periodSeconds: 180
       # -- Set the timeout for the startup probe in seconds
-      timeoutSeconds: 60
+      timeoutSeconds: 360
 
     livenessProbe:
       # -- Set the failure threshold for the liveness probe
@@ -269,14 +280,14 @@ controller:
         # -- Set the Pod's HTTP port to use for the liveness probe
         port: http
       # -- Set the time interval between two liveness probes executions in seconds
-      periodSeconds: 60
+      periodSeconds: 120
       # -- Set the timeout for the liveness probe in seconds
-      timeoutSeconds: 60
+      timeoutSeconds: 180
 
       # If Startup Probe is not supported on your Kubernetes cluster, you might want to use "initialDelaySeconds" instead.
       # It delays the initial liveness probe while Jenkins is starting
       # -- Set the initial delay for the liveness probe in seconds
-      initialDelaySeconds: 60
+      initialDelaySeconds: 120
 
     readinessProbe:
       # -- Set the failure threshold for the readiness probe
@@ -289,7 +300,7 @@ controller:
       # -- Set the time interval between two readiness probes executions in seconds
       periodSeconds: 10
       # -- Set the timeout for the readiness probe in seconds
-      timeoutSeconds: 60
+      timeoutSeconds: 120
 
       # If Startup Probe is not supported on your Kubernetes cluster, you might want to use "initialDelaySeconds" instead.
       # It delays the initial readiness probe while Jenkins is starting
@@ -650,50 +661,50 @@ controller:
   # -- Update strategy for StatefulSet
   updateStrategy: {}
 
-  ingress:
-    # -- Enables ingress
-    enabled: false
+  # ingress:
+  #   # -- Enables ingress
+  #   enabled: true
 
-    # Override for the default paths that map requests to the backend
-    # -- Override for the default Ingress paths
-    paths: []
-    # - backend:
-    #     serviceName: ssl-redirect
-    #     servicePort: use-annotation
-    # - backend:
-    #     serviceName: >-
-    #       {{ template "jenkins.fullname" . }}
-    #     # Don't use string here, use only integer value!
-    #     servicePort: 8080
+  #   # Override for the default paths that map requests to the backend
+  #   # -- Override for the default Ingress paths
+  #   paths: []
+  #   # - backend:
+  #   #     serviceName: ssl-redirect
+  #   #     servicePort: use-annotation
+  #   # - backend:
+  #   #     serviceName: >-
+  #   #       {{ template "jenkins.fullname" . }}
+  #   #     # Don't use string here, use only integer value!
+  #   #     servicePort: 8080
 
-    # For Kubernetes v1.14+, use 'networking.k8s.io/v1beta1'
-    # For Kubernetes v1.19+, use 'networking.k8s.io/v1'
-    # -- Ingress API version
-    apiVersion: "extensions/v1beta1"
-    # -- Ingress labels
-    labels: {}
-    # -- Ingress annotations
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
-    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
+  #   # For Kubernetes v1.14+, use 'networking.k8s.io/v1beta1'
+  #   # For Kubernetes v1.19+, use 'networking.k8s.io/v1'
+  #   # -- Ingress API version
+  #   apiVersion: "extensions/v1beta1"
+  #   # -- Ingress labels
+  #   labels: {}
+  #   # -- Ingress annotations
+  #   annotations: {}
+  #     # kubernetes.io/ingress.class: nginx
+  #     # kubernetes.io/tls-acme: "true"
+  #   # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  #   # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  #   # ingressClassName: nginx
 
-    # Set this path to jenkinsUriPrefix above or use annotations to rewrite path
-    # -- Ingress path
-    path:
+  #   # Set this path to jenkinsUriPrefix above or use annotations to rewrite path
+  #   # -- Ingress path
+  #   path:
 
-    # configures the hostname e.g. jenkins.example.com
-    # -- Ingress hostname
-    hostName:
-    # -- Hostname to serve assets from
-    resourceRootUrl:
-    # -- Ingress TLS configuration
-    tls: []
-    # - secretName: jenkins.cluster.local
-    #   hosts:
-    #     - jenkins.cluster.local
+  #   # configures the hostname e.g. jenkins.example.com
+  #   # -- Ingress hostname
+  #   hostName: "devops-jenkins.domain.com"
+  #   # -- Hostname to serve assets from
+  #   resourceRootUrl:
+  #   # -- Ingress TLS configuration
+  #   tls: []
+  #   # - secretName: jenkins.cluster.local
+  #   #   hosts:
+  #   #     - jenkins.cluster.local
 
   # often you want to have your controller all locked down and private,
   # but you still want to get webhooks from your SCM
@@ -750,15 +761,12 @@ controller:
     path:
 
   # -- Allows for adding entries to Pod /etc/hosts
-  hostAliases: []
+  hostAliases:
   # ref: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   # hostAliases:
   # - ip: 192.168.50.50
   #   hostnames:
   #     - something.local
-  # - ip: 10.0.50.50
-  #   hostnames:
-  #     - other.local
 
   # Expose Prometheus metrics
   prometheus:
@@ -1185,6 +1193,7 @@ persistence:
   # If defined, PVC must be created manually before volume will be bound
   # -- Provide the name of a PVC
   existingClaim:
+  #existingClaim: jenkins-devops-pvc
 
   # jenkins data Persistent Volume Storage Class
   # If defined, storageClassName: <storageClass>
@@ -1192,15 +1201,16 @@ persistence:
   # If undefined (the default) or set to null, no storageClassName spec is
   #   set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS & OpenStack)
   # -- Storage class for the PVC
-  storageClass: local-storage
+  storageClass: nfs-client
   # -- Annotations for the PVC
   annotations: {}
+  #storageclass-class: “true”
   # -- Labels for the PVC
   labels: {}
   # -- The PVC access mode
   accessMode: "ReadWriteOnce"
   # -- The size of the PVC
-  size: "8Gi"
+  size: "5Gi"
 
   # ref: https://kubernetes.io/docs/concepts/storage/volume-pvc-datasource/
   # -- Existing data source to clone PVC from
@@ -1211,14 +1221,22 @@ persistence:
   # -- SubPath for jenkins-home mount
   subPath:
   # -- Additional volumes
-  volumes: []
-  #  - name: nothing
+  volumes:
+    - name: known-hosts
+      configMap:
+        name: known-hosts  # Replace with your ConfigMap name
+
+  #  - name: jenkins-devops-pv
+  #    persistentVolumeClaim:
+  #      claimName: jenkins-devops-pvc
   #    emptyDir: {}
 
   # -- Additional mounts
-  mounts: []
-  #  - mountPath: /var/nothing
-  #    name: nothing
+  mounts:
+    - name: known-hosts
+      mountPath: /var/jenkins_home/.ssh
+  #  - mountPath: /var/jenkins_home
+  #    name: jenkins-devops-pv
   #    readOnly: true
 
 networkPolicy:

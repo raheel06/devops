@@ -49,6 +49,16 @@ controller:
               - "devops-pipeline"
               name: "devops"
 
+          - list:
+              columns:
+              - "status"
+              - "jobName"
+              - "lastSuccess"
+              - "lastFailure"
+              - "lastDuration"
+              - "lastStable"
+              includeRegex: ".*QA"
+              name: "QA"
 
 #          - envDashboard:
 #              deployHistory: "10"

@@ -1,7 +1,14 @@
 controller:
+
+  # Below is the implementation of Jenkins Configuration as Code. Add a key under configScripts for each configuration area,
+  # where each corresponds to a plugin or section of the UI. Each key (prior to | character) is just a label, and can be any value.
+  # Keys are only used to give the section a meaningful name. The only restriction is they may only contain RFC 1123 \ DNS label
+  # characters: lowercase letters, numbers, and hyphens. The keys become the name of a configuration yaml file on the controller in
+  # /var/jenkins_home/casc_configs (by default) and will be processed by the Configuration as Code Plugin. The lines after each |
+  # become the content of the configuration yaml file. The first line after this is a JCasC root element, e.g., jenkins, credentials,
+  # etc. Best reference is https://<jenkins_url>/configuration-as-code/reference. The example below creates a welcome message:
   JCasC:
     configScripts:
-
       custom-casc-tools: |
 
           tool:
@@ -31,12 +38,25 @@ controller:
                     installers:
                     - gradleInstaller:
                         id: "6.4"
+              - name: "gradle-40"
+                properties:
+                - installSource:
+                    installers:
+                    - gradleInstaller:
+                        id: "4.0"
               - name: "gradle-7.5"
                 properties:
                 - installSource:
                     installers:
                     - gradleInstaller:
                         id: "7.5"
+              - name: "gradle-standard"
+                properties:
+                - installSource:
+                    installers:
+                    - gradleInstaller:
+                        id: "7.2"
+
             jdk:
               installations:
               - name: "OpenJDK1.8.x"
@@ -56,7 +76,8 @@ controller:
                 - installSource:
                     installers:
                     - adoptOpenJdkInstaller:
-                        id: "jdk8u352-b08"
+                        id: "jdk8u362-b09"
+
               - name: "OpenJDK11"
                 properties:
                 - installSource:
@@ -126,8 +147,63 @@ controller:
             mavenGlobalConfig:
               globalSettingsProvider: "standard"
               settingsProvider: "standard"
+
+
+            msBuildSQRunnerInstallation:
+              installations:
+              - name: "SonarScanner_MSBuild"
+                properties:
+                - installSource:
+                    installers:
+                    - msBuildSonarQubeRunnerInstaller:
+                        id: "5.2.2.33595"
+              - name: "SonarScannerV4.8"
+                properties:
+                - installSource:
+                    installers:
+                    - msBuildSonarQubeRunnerInstaller:
+                        id: "5.2.2.33595"
+              - name: "SonarScanner-Framework-Latest"
+                properties:
+                - installSource:
+                    installers:
+                    - msBuildSonarQubeRunnerInstaller:
+                        id: "5.2.2.33595"
+              - name: "SonarScanner-Core-Latest"
+                properties:
+                - installSource:
+                    installers:
+                    - msBuildSonarQubeRunnerInstaller:
+                        id: "5.2.2.33595"
+              - name: "SonarScanner-Core-V4.8"
+                properties:
+                - installSource:
+                    installers:
+                    - msBuildSonarQubeRunnerInstaller:
+                        id: "5.2.2.33595"
+
             nodejs:
               installations:
+
+              - name: "nodejs-standard"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "15.2.1"
+                        npmPackages: "newman"
+                        npmPackagesRefreshHours: 72
+
+              - name: "nodejs-v10.14.2"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "10.14.2"
+                        npmPackages: "newman"
+                        npmPackagesRefreshHours: 72
+
+
               - name: "nodejs-v18.13.0"
                 properties:
                 - installSource:
@@ -151,14 +227,7 @@ controller:
                         id: "13.6.0"
                         npmPackages: "newman"
                         npmPackagesRefreshHours: 72
-              - name: "nodejs-standard"
-                properties:
-                - installSource:
-                    installers:
-                    - nodeJSInstaller:
-                        id: "15.2.1"
-                        npmPackages: "newman"
-                        npmPackagesRefreshHours: 72
+
               - name: "nodejs-v16.13.0"
                 properties:
                 - installSource:
@@ -181,6 +250,16 @@ controller:
                     - nodeJSInstaller:
                         id: "16.14.0"
                         npmPackagesRefreshHours: 72
+
+              - name: "nodejs-v16.14.2"
+                properties:
+                - installSource:
+                    installers:
+                    - nodeJSInstaller:
+                        id: "16.14.2"
+                        npmPackages: "newman grunt-cli"
+                        npmPackagesRefreshHours: 72
+
               - name: "nodejs-v18.13.0"
                 properties:
                 - installSource:
@@ -221,3 +300,9 @@ controller:
                     installers:
                     - sonarRunnerInstaller:
                         id: "4.2.0.1873"
+              - name: "Sonar-4.6"
+                properties:
+                - installSource:
+                    installers:
+                    - sonarRunnerInstaller:
+                        id: "4.6.2.2472"

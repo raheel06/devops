@@ -54,7 +54,17 @@ controller:
         - "method hudson.PluginManager getPlugin java.lang.String"
         - "method jenkins.model.Jenkins getPluginManager"
         - "staticMethod jenkins.model.Jenkins getInstance"
-
+        - "method java.util.Collection toArray"
+        - "staticMethod java.lang.System setProperty java.lang.String java.lang.String"
+        - "method groovy.json.JsonSlurper parseFile java.io.File java.lang.String"
+        - "method hudson.model.Hudson getJob java.lang.String"        
+        - "method hudson.model.Job getLastBuild"
+        - "method java.io.File getAbsolutePath"
+        - "method jenkins.model.Jenkins getItemByFullName java.lang.String"
+        - "new java.io.File java.lang.String"
+        - "staticMethod hudson.util.Secret fromString java.lang.String"        
+        - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods withReader java.io.File\
+          \ groovy.lang.Closure"
 
 
     # Ignored if securityRealm is defined in controller.JCasC.configScripts
@@ -77,7 +87,7 @@ controller:
 #          ttl: 600
 #        startTls: true
 #        internalUsersDatabase:
-#          jenkinsInternalUser: "jenkins"
+#          jenkinsInternalUser: "admin"
 
 #For Test system
     securityRealm: |-
@@ -90,67 +100,4 @@ controller:
           name: "Jenkins Admin"
           password: "${chart-admin-password}"
 
-    # Ignored if authorizationStrategy is defined in controller.JCasC.configScripts
-    # -- Jenkins Config as Code Authorization Strategy-section
-    #authorizationStrategy: |-
-    #  loggedInUsersCanDoAnything:
-    #    allowAnonymousRead: true
-    authorizationStrategy: |-
-    
-      roleBased:
-        roles:
-          global:
-          - name: "admin"
-            description: "Jenkins administrators"
-            permissions:
-            - "Overall/Administer"
-            entries:
-            - user: "admin"
-            - user: "devops"
-
-          - name: "readonly"
-            description: "Read-only users"
-            permissions:
-            - "Overall/Read"
-            - "Job/Read"
-            - "Job/Workspace"
-            - "View/Read"
-            entries:
-            - user: "anonymous"
-
-          - name: "DevOps"
-            entries:
-            - group: "Group-DevOps"
-            permissions:
-            - "Overall/Administer"
-
-          - name: "Developer"
-            description: "development team members"
-            permissions:
-            - "Job/Build"
-            - "Job/Cancel"
-            - "Overall/Read"
-            - "Job/Read"
-            - "Job/Workspace"
-            - "Job/Discover"
-            - "Job/Discover"
-            - "View/Read"
-            entries:
-            - user: "devops"
-
-
-          items:
-          - name: "qa-uat-deploy"
-            pattern: ".*-deploy.*(UAT|QMG)"
-            permissions:
-            - "Job/Build"
-            - "Job/Cancel"
-            - "Overall/Read"
-            - "Job/Read"
-            - "Job/Workspace"
-            - "Job/Discover"
-            - "Job/Discover"
-            - "View/Read"
-            entries:
-            - user: "devops"
 

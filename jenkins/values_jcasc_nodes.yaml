@@ -4,6 +4,20 @@ controller:
     configScripts:
 
       custom-casc-nodes: |
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - basicSSHUserPrivateKey:
+                  scope: GLOBAL
+                  id: "kube-ssh"
+                  username: "root"
+                  description: "Linux Slave Agent ssh key"
+                  privateKeySource:
+                    directEntry:
+                      privateKey: "${SSH_PRIVATE_KEY}"
+
+
       
         jenkins:
           nodes:
@@ -11,12 +25,16 @@ controller:
               labelString: "linux"
               launcher:
                 ssh:
-                  credentialsId: "ssh"
+                  credentialsId: "kube-ssh"
                   host: "{Agent_IP}"
                   port: 22
                   sshHostKeyVerificationStrategy: "knownHostsFileKeyVerificationStrategy"
+                  maxNumRetries: 3
+                  javaPath: "/usr/lib/jvm/java-22-openjdk/bin/java"
               name: "linux-agent"
               nodeDescription: "Linux Agent ({Agent_IP})"
               numExecutors: 3
               remoteFS: "/opt/kube-{{.Values.nameOverride}}"
               retentionStrategy: "always"
+
+# javaPath is path where java is installed to spin up the agent. it can be different than the one active on the agent.

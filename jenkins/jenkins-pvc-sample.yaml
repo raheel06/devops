@@ -2,9 +2,9 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: jenkins-devops-pvc
-  namespace: devops-tools
+  namespace: devops
 spec:
-  storageClassName: local-storage
+  storageClassName: nfs-client
   accessModes:
     - ReadWriteOnce
   resources:
