@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kubernetes-devops-repo
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  name: kubernetes-devops-repo
+  type: git
+  url: https://github.com/devops/kubernetes-config.git
+  password: devops
+  username: devops
+  project: default

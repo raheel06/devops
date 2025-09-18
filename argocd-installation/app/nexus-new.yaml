@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nexus-new
+  namespace: devops
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/devops/kubernetes-config.git'
+    path: nexus3-new
+    targetRevision: HEAD
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: devops

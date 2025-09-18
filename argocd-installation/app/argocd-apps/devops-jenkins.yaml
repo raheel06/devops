@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devops-jenkins
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devops
+  sources:
+    - repoURL: https://charts.jenkins.io/
+      chart: jenkins
+      targetRevision: 5.8.79  #2.516.1 Jenkins version
+      helm:
+        valueFiles:
+          - $values/Jenkins/values_jenkins_devops.yaml
+          - $values/Jenkins/values_jcasc_roles_devops.yaml
+          - $values/Jenkins/values_jcasc_views_devops.yaml
+          - $values/Jenkins/values_main.yaml
+          - $values/Jenkins/values_plugins.yaml
+          - $values/Jenkins/values_jcasc_main.yaml
+          - $values/Jenkins/values_jcasc_credentials.yaml
+          - $values/Jenkins/values_jcasc_system_config.yaml
+          - $values/Jenkins/values_jcasc_tools.yaml
+          - $values/Jenkins/values_jcasc_nodes.yaml
+          - $values/Jenkins/values_jcasc_sonar.yaml
+          - $values/Jenkins/values_jcasc_jira.yaml
+          - $values/Jenkins/values_jcasc_gitlab.yaml
+          - $values/Jenkins/values_jcasc_emails.yaml
+          - $values/Jenkins/values_jcasc_influxdb.yaml
+        parameters:
+          - name: controller.initializeOnce
+            value: 'true'
+    - repoURL: 'https://github.com/devops/kubernetes-config.git'
+      targetRevision: main
+      ref: values

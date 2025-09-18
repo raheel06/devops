@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: unleash
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devops
+  sources:
+    - repoURL: https://docs.getunleash.io/helm-charts
+      chart: unleash
+      targetRevision: 5.6.0
+      helm:
+        parameters:
+          - name: image.repository
+            value: 'unleashorg/unleash-server'
+          - name: image.pullPolicy
+            value: 'IfNotPresent'
+          - name: nodeSelector.node-role
+            value: 'devops'
+          - name: replicaCount
+            value: '1'
+
+        valueFiles:
+          - $values/unleash/values-unleash.yaml
+    - repoURL: 'https://github.com/devops/kubernetes-config.git'
+      targetRevision: main
+      ref: values
+

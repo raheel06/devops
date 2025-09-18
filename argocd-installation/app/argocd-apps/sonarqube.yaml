@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sonarqube
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devops
+  sources:
+    - repoURL: https://SonarSource.github.io/helm-chart-sonarqube
+      chart: sonarqube
+      targetRevision: 2025.3.0
+      helm:
+        valueFiles:
+          - $values/sonarqube/values.yaml
+    - repoURL: 'https://github.com/devops/kubernetes-config.git'
+      targetRevision: main
+      ref: values

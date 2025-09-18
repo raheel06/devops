@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: devops-project
+  namespace: argocd
+spec:
+  description: "DevOps's application will be deployed under this project"
+  sourceRepos:
+    - "https://github.com/devops/kubernetes-config.git"
+  destinations:
+    - namespace: "*"
+      server: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

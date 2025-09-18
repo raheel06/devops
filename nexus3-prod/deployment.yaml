@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+  namespace: devops
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: nexus-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nexus-server
+    spec:
+      priorityClassName: critical-priority
+      nodeSelector:
+        node-role: devops
+      containers:
+        - name: nexus
+          image: sonatype/nexus3:3.81.1
+          resources:
+            limits:
+              memory: "8Gi"
+              cpu: "8000m"
+            requests:
+              memory: "4Gi"
+              cpu: "2500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            failureThreshold: 6
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8081
+            initialDelaySeconds: 190
+            periodSeconds: 15
+            failureThreshold: 6
+            timeoutSeconds: 5
+          ports:
+            - name: web
+              containerPort: 8081
+              protocol: TCP
+            - name: docker-hosted
+              containerPort: 8082
+              protocol: TCP
+            - name: docker-group
+              containerPort: 8083
+              protocol: TCP
+          volumeMounts:
+            - name: nexus-data
+              mountPath: /nexus-data
+      volumes:
+        - name: nexus-data
+          persistentVolumeClaim:
+            claimName: nexus-pvc

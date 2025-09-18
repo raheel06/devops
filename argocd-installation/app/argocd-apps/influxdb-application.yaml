@@ -1,0 +1,49 @@
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: influxdb
+#   namespace: devops
+# spec:
+#   project: default
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: devops
+#   sources:
+#     - repoURL: https://charts.bitnami.com/bitnami
+#       chart: bitnami/influxdb
+#       targetRevision: 6.6.1
+#       helm:
+#         parameters:
+#           - name: global.imageRegistry
+#             value: 'dockerhub.com'
+#           - name: image.registry
+#             value: 'dockerhub.com'
+#           - name: auth.admin.org
+#             value: 'visa'
+#           - name: auth.admin.password
+#             value: 'influxdb-admin'
+#           - name: influxdb.nodeSelector.node-role
+#             value: 'devops'
+#           - name: influxdb.resources.limits.memory
+#             value: '1Gi'
+#           - name: influxdb.resources.limits.cpu
+#             value: '2'
+#           - name: influxdb.service.type
+#             value: 'NodePort'
+#           - name: influxdb.service.nodePorts.http
+#             value: '30550'
+#           - name: persistence.storageClass
+#             value: 'nfs-share'
+#           - name: ingress.enabled
+#             value: 'true'
+#           - name: ingress.hostname
+#             value: 'devops-influxdb.domain.com'
+
+
+
+
+#     #     valueFiles:
+#     #       - $values/influxdb/values-influxdb.yaml
+#     # - repoURL: 'https://github.com/devops/kubernetes-config.git'
+#     #   targetRevision: main
+#     #   ref: values
