@@ -35,7 +35,7 @@ controller:
               - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
               mailAccount:
                 smtpHost: "{IP_ADDRESS}"
-                credentialsId: "devops"
+                credentialsId: "devops-email"
               maxAttachmentSize: -1
               maxAttachmentSizeMb: -1
               precedenceBulk: false

@@ -1,0 +1,36 @@
+controller:
+  JCasC:
+    configScripts:
+      custom-casc-influxdb: |
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - usernamePassword:
+                  description: "influxdb-admin"
+                  id: "influxdb-admin"
+                  password: "influxdb-admin"
+                  scope: GLOBAL
+                  username: "admin"
+                  usernameSecret: true
+              - usernamePassword:
+                  description: "influxdb-user"
+                  id: "influxdb-user"
+                  password: "influxdb-user"
+                  scope: GLOBAL
+                  username: "devops"
+
+        unclassified:
+            influxDbGlobalConfig:
+              targets:
+              - credentialsId: "influxdb-user"
+                database: "devops"
+                description: "devops-influxdb"
+                exposeExceptions: false
+                globalListener: false
+                jobScheduledTimeAsPointsTimestamp: true
+                organization: "devops"
+                retentionPolicy: "autogen"
+                url: "http://influxdb.devops.svc.cluster.local:8086"
+                usingJenkinsProxy: false
+

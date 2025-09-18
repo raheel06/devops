@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: reportportal
+  namespace: devops
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devops
+  sources:
+    - repoURL: https://reportportal.io/kubernetes
+      chart: reportportal
+      targetRevision: 25.1.31
+      helm:
+        valueFiles:
+          - $values/reportportal/values-reportportal.yaml
+    - repoURL: 'git@git.domain.com:devops/kubernetes-config.git'
+      targetRevision: main
+      ref: values

@@ -65,7 +65,7 @@ controller:
   executorMode: "NORMAL"
 
   # -- Append Jenkins labels to the controller
-  customJenkinsLabels: []
+  customJenkinsLabels: ["master"]
 
   hostNetworking: false
 
@@ -112,13 +112,13 @@ controller:
   #   - --httpPort=8080
 
   # -- Resource allocation (Requests and Limits)
-  resources:
-    requests:
-      cpu: "50m"
-      memory: "256Mi"
-    limits:
-      cpu: "2000m"
-      memory: "6Gi"
+  # resources:
+  #   requests:
+  #     cpu: "50m"
+  #     memory: "256Mi"
+  #   limits:
+  #     cpu: "2000m"
+  #     memory: "6Gi" 
 
   # Share process namespace to allow sidecar containers to interact with processes in other containers in the same pod
   shareProcessNamespace: false
@@ -150,6 +150,11 @@ controller:
   containerEnv: 
     - name: JAVA_TOOL_OPTIONS
       value: "-Dfile.encoding=UTF-8"
+    - name: LANG
+      value: "en_US.UTF-8"
+    - name: TZ
+      value: "Asia/Dubai"
+
 
   # you need to create a secret with this name and put the ssh private key there
     - name: SSH_PRIVATE_KEY
@@ -161,11 +166,15 @@ controller:
     # - name: http_proxy
     #   value: "http://192.168.64.1:3128"
 
+
   # Set min/max heap here if needed with "-Xms512m -Xmx512m"
   # -- Append to `JAVA_OPTS` env var
-  javaOpts:
+  javaOpts: >-
+    -Dhudson.model.DirectoryBrowserSupport.CSP="default-src 'self'; style-src 'self' 'unsafe-inline';"
+
   # -- Append to `JENKINS_OPTS` env var
-  jenkinsOpts: "--sessionTimeout=5 --sessionEviction=1800"
+  jenkinsOpts: "--sessionTimeout=60 --sessionEviction=5400"
+
 
   # If you are using the ingress definitions provided by this chart via the `controller.ingress` block,
   # the configured hostname will be the ingress hostname starting with `https://`
@@ -248,7 +257,10 @@ controller:
 
   # Put labels on Jenkins controller pod
   # -- Custom Pod labels (an object with `label-key: label-value` pairs)
-  podLabels: {}
+  # podLabels: {}
+  podLabels:
+    monitoring: "true"
+    team: "devops"
 
   # Enable Kubernetes Startup, Liveness and Readiness Probes
   # if Startup Probe is supported, enable it too
@@ -260,38 +272,38 @@ controller:
   probes:
     startupProbe:
       # -- Set the failure threshold for the startup probe
-      failureThreshold: 12
+      failureThreshold: 30  # Total maximum wait time: 10 minutes
       httpGet:
         # -- Set the Pod's HTTP path for the startup probe
         path: '{{ default "" .Values.controller.jenkinsUriPrefix }}/login'
         # -- Set the Pod's HTTP port to use for the startup probe
         port: http
       # -- Set the time interval between two startup probes executions in seconds
-      periodSeconds: 180
+      periodSeconds: 10
       # -- Set the timeout for the startup probe in seconds
-      timeoutSeconds: 360
+      timeoutSeconds: 5
 
     livenessProbe:
       # -- Set the failure threshold for the liveness probe
-      failureThreshold: 5
+      failureThreshold: 5   # Fail after 5 consecutive failures
       httpGet:
         # -- Set the Pod's HTTP path for the liveness probe
         path: '{{ default "" .Values.controller.jenkinsUriPrefix }}/login'
         # -- Set the Pod's HTTP port to use for the liveness probe
         port: http
       # -- Set the time interval between two liveness probes executions in seconds
-      periodSeconds: 120
+      periodSeconds: 10   # Check every 30 seconds
       # -- Set the timeout for the liveness probe in seconds
-      timeoutSeconds: 180
+      timeoutSeconds: 5   # timeout to 1 minute
 
       # If Startup Probe is not supported on your Kubernetes cluster, you might want to use "initialDelaySeconds" instead.
       # It delays the initial liveness probe while Jenkins is starting
       # -- Set the initial delay for the liveness probe in seconds
-      initialDelaySeconds: 120
+      initialDelaySeconds: 30    # Delay the first check by 5 minutes
 
     readinessProbe:
       # -- Set the failure threshold for the readiness probe
-      failureThreshold: 3
+      failureThreshold: 6
       httpGet:
         # -- Set the Pod's HTTP path for the liveness probe
         path: '{{ default "" .Values.controller.jenkinsUriPrefix }}/login'
@@ -300,12 +312,12 @@ controller:
       # -- Set the time interval between two readiness probes executions in seconds
       periodSeconds: 10
       # -- Set the timeout for the readiness probe in seconds
-      timeoutSeconds: 120
+      timeoutSeconds: 10
 
       # If Startup Probe is not supported on your Kubernetes cluster, you might want to use "initialDelaySeconds" instead.
       # It delays the initial readiness probe while Jenkins is starting
       # -- Set the initial delay for the readiness probe in seconds
-      initialDelaySeconds: 3
+      initialDelaySeconds: 60
 
   # PodDisruptionBudget config
   podDisruptionBudget:
@@ -632,7 +644,9 @@ controller:
 
   # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   # -- Node labels for pod assignment
-  nodeSelector: {}
+  # nodeSelector: {}
+  nodeSelector:
+    node-role: devops
 
   # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
   # -- Toleration labels for pod assignment
@@ -650,7 +664,7 @@ controller:
   # Leverage a priorityClass to ensure your pods survive resource shortages
   # ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
   # -- The name of a `priorityClass` to apply to the controller pod
-  priorityClassName:
+  # priorityClassName:
 
   # -- Annotations for controller pod
   podAnnotations: {}
@@ -1201,7 +1215,7 @@ persistence:
   # If undefined (the default) or set to null, no storageClassName spec is
   #   set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS & OpenStack)
   # -- Storage class for the PVC
-  storageClass: nfs-client
+  storageClass: nfs-share
   # -- Annotations for the PVC
   annotations: {}
   #storageclass-class: “true”

@@ -1,0 +1,437 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: squash-postgres-secret
+  namespace: devops
+type: Opaque
+data:
+  POSTGRES_USER: c3F1YXNodG0=  # Base64 encoded 'squashtm'
+  POSTGRES_PASSWORD: c3F1YXNodG0=  # Base64 encoded 'squashtm'
+  POSTGRES_DB: c3F1YXNodG0=  # Base64 encoded 'squashtm'
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: squash-postgres-pvc
+  namespace: devops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs-share  # Ensure this storage class exists
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: squash-postgres
+  name: squash-postgres
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: squash-postgres
+  template:
+    metadata:
+      labels:
+        app: squash-postgres
+    spec:
+      priorityClassName: low-priority
+      nodeSelector:
+        node-role: devops
+      containers:
+      - name: postgresql
+        image: postgres:15
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: squash-postgres-secret
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: squash-postgres-secret
+                key: POSTGRES_PASSWORD
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: squash-postgres-secret
+                key: POSTGRES_DB
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata          
+        # - name: POSTGRES_USER
+        #   value: squashtm
+        # - name: POSTGRES_PASSWORD
+        #   value: squashtm
+        # - name: POSTGRES_DB
+        #   value: squashtm
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+          subPath: pgdata
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: squash-postgres-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: squash-svc-postgres
+  namespace: devops
+spec:
+  ports:
+  - name: postgres
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app: squash-postgres
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: squash-plugins-config
+  namespace: devops
+data:
+  start-plugins.cfg: |
+    scm-git
+    report-books-pdf
+
+    # result-publisher
+    # testplan-retriever-community
+    # squashautom-community
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-squash-tm
+  namespace: devops
+data:
+  squash.tm.cfg.properties: >
+    management.endpoints.enabled-by-default = true
+
+    management.endpoints.web.exposure.include = health,metrics
+
+    squash.db.update-mode = forced
+
+    squash.external.synchronisation.enabled = false
+
+    squash.rest-api.jwt.secret =
+    ZXlKaGJHY2lPaUpTVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SjFjMlZ5Ym1GdFpTSTZJbUZrYldsdUlpd2ljbTlzWlhNaU9sc2lZV1J0YVc0aVhTd2lhV0YwSWpveE56UXhNVFl5TmpVeUxDSmxlSEFpT2pFM05EUTJNVGcyTlRKOS5YTXJJNnR6cGFHaV9yVGZQRi14bFVHSmozMlVoQmE5aHRkTTI3Q2pORkdmdDAtM1lhWHgxZ2F1ZHhwa2lUSmNyeFBDTmRlWkNycVNTZWdOV1dGQlJfN2FUVG16c3RtLXVuZFFpV1RnWDhxLVVsd09ETTI3TUhSZ0ZCVkhYd3FGZEVnaU8zeU5WQzFGVi1HVHk2VFB4eUZlYTM3V0xTbnlYUlpNQnYtbkc0Uy1yYmpxckREVzdkeWRNREQ4OEo0aUcxSDBYenhuSUk1amtZUkF0NWZaLUhSc1FJbTBDSTg4aklMODh5VENuaE5tYVZIY3JkNXBwaURsTmMyZUxJQTZ0S0xRYkZfbldOaVpoU0tmaXpFcXR1VEpLRHRVQl90V2cxRWxlMXUzUnd3b0hMTTRMYzBkRDdoMjZ0c2hHUTdsdDFEZ0pQelVvdFlnMnFvb3FqR3dicG9TdzB4aHdXd3UzbWRSSGgxaklESGJEb3pJVGt4X3lHZTMybTZXd0pmYlNnckEyOUtZRDdkak4xbUhmU3pYWVZNQmt0S2dZSVVNbmNOZlVibFNXVGh5LWRvX0ppWkg2ZUJHUGFDUmw2eWxXVm5FSEo4WmJDb29sbTRBblhoYmxMU25yeDdLdFNzM2E5ZWNaZ0FvZmJkQ2dhREZXcUZtSjNiZmstQjZ3c1JXazY0ZDBkRFRIMjQtOFUxelhNVlJiQ09ibnR4MEg0bER2Q3J3T0xvQWJtaEVXQXBmTTFRSmJDSGE0WU9fbFhMbmRuWmk5dVFKU2J2M05JSGhGRGdWdFNteW5UckhUeGc3YzFxWl9rUWI2cU1JaGVPbUl5a0QwMHotV0oxdkNrSmg5S05Cd0Z6S2lXZmpySnEyYWpud1Exb18xWHU2V1Noc3VMOGI0dEZubndzOA==
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: squash-logs-pvc
+  namespace: devops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: nfs-share
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: squash-imports-pvc
+  namespace: devops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: nfs-share
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: squash-tm
+  name: squash-tm
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: squash-tm
+  template:
+    metadata:
+      labels:
+        app: squash-tm
+    spec:
+      priorityClassName: low-priority
+      nodeSelector:
+        node-role: devops
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: squash-tm
+        image: squashtest/squash:9.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SQTM_DB_TYPE
+          value: postgresql
+        - name: SQTM_DB_HOST
+          value: squash-svc-postgres
+        - name: SQTM_DB_USERNAME
+          # value: squashtm
+          valueFrom:
+            secretKeyRef:
+              name: squash-postgres-secret
+              key: POSTGRES_USER
+
+        - name: SQTM_DB_PASSWORD
+          # value: squashtm
+          valueFrom:
+            secretKeyRef:
+              name: squash-postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: SQTM_DB_NAME
+          # value: squashtm
+          valueFrom:
+            secretKeyRef:
+              name: squash-postgres-secret
+              key: POSTGRES_DB
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - name: logs-volume
+          mountPath: /opt/squash-tm/logs
+        - name: imports-volume
+          mountPath: /opt/squash-tm/imports
+        - name: plugins-config
+          mountPath: /opt/squash-tm/conf/start-plugins.cfg
+          subPath: start-plugins.cfg
+        - name: squashtm-config
+          mountPath: /opt/squash-tm/conf/squash.tm.cfg.properties
+          subPath: squash.tm.cfg.properties
+
+      volumes:
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: squash-logs-pvc
+      - name: imports-volume
+        persistentVolumeClaim:
+          claimName: squash-imports-pvc
+      - name: plugins-config
+        configMap:
+          name: squash-plugins-config
+      - name: squashtm-config
+        configMap:
+          name: config-squash-tm
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: squash-svc-tm
+  namespace: devops
+spec:
+  type: ClusterIP # Change to ClusterIP if using an ingress controller
+  ports:
+  - name: squash-tm
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    # nodePort: 32080
+  selector:
+    app: squash-tm
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: squash-orchestrator-config
+  namespace: devops
+data:
+  config.yaml: |
+    contexts:
+    - context:
+        trusted_authorities:
+        - /etc/squashtf/*
+        environments:
+        - name: cypress-runner
+          namespace: default
+          tags:
+            - windows
+            - cypress
+            - linux
+      name: allinone
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: squash-autom
+  name: squash-autom
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: squash-autom
+  template:
+    metadata:
+      labels:
+        app: squash-autom
+    spec:
+      priorityClassName: low-priority
+      nodeSelector:
+        node-role: devops
+      containers:
+      - name: orchestrator
+        image: squashtest/squash-orchestrator:5.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7774
+          protocol: TCP
+        - containerPort: 7775
+          protocol: TCP
+        - containerPort: 7776
+          protocol: TCP
+        - containerPort: 7796
+          protocol: TCP
+        - containerPort: 38368
+          protocol: TCP
+        - containerPort: 34537
+          protocol: TCP
+        - containerPort: 24368
+          protocol: TCP
+        - containerPort: 12312
+          protocol: TCP
+        resources:
+          limits:
+            memory: 1.5G
+          requests:
+            cpu: "1.5"
+            memory: 1.5G
+
+        volumeMounts:
+          - name: orchestrator-config
+            mountPath: /etc/squashtf/config.yaml
+            subPath:  config.yaml
+          - name: squash-orchestrator-trusted-key
+            mountPath: /etc/squashtf/trusted_key.pub
+            subPath: trusted_key.pub
+            
+      volumes:
+        - name: orchestrator-config
+          configMap:
+            name: squash-orchestrator-config
+        - name: squash-orchestrator-trusted-key
+          secret:
+            secretName: squash-trusted-public-keys
+            defaultMode: 420
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: squash-svc-autom
+  namespace: devops
+spec:
+  type: NodePort # Change to ClusterIP if using an ingress controller
+  selector:
+    app: squash-autom
+  ports:
+  - name: receptionist
+    port: 7774
+    protocol: TCP
+    targetPort: 7774
+  - name: eventbus
+    port: 38368
+    protocol: TCP
+    targetPort: 38368
+  - name: localstore
+    port: 34537
+    protocol: TCP
+    targetPort: 34537
+  - name: observer
+    port: 7775
+    protocol: TCP
+    targetPort: 7775
+  - name: killswitch
+    port: 7776
+    protocol: TCP
+    targetPort: 7776
+  - name: insightcollector
+    port: 7796
+    protocol: TCP
+    targetPort: 7796
+  - name: agentchannel
+    port: 24368
+    protocol: TCP
+    targetPort: 24368
+    nodePort: 30560  # Expose on a high port (30000–32767)
+  - name: qualitygate
+    port: 12312
+    protocol: TCP
+    targetPort: 12312
+
+
+
+# INGRESS
+# If you use an ingress controller, you can use the configuration bellow
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: squash-ingress
+  namespace: devops
+spec:
+  rules:
+  - host: devops-squash.domain.com
+    http:
+      paths:
+      - path: /squash
+        pathType: Prefix
+        backend:
+          service:
+            name: squash-svc-tm
+            port:
+              name: squash-tm

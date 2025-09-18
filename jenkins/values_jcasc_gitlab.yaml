@@ -66,7 +66,7 @@ controller:
                     scm:
                       git:
                         credentialsId: "Gitlab-User"
-                        id: "98320fc7-d70a-44ab-9eeb-7b5e7d743459"
+                        id: "98320fc7"
                         remote: "https://{GIT_DomainName}/devops-projects/shared-libraries-jenkins.git"
                         traits:
                         - "gitBranchDiscovery"
@@ -80,3 +80,4 @@ controller:
                 hideCredentials: false
                 showEntireCommitSummaryInChanges: false
                 useExistingAccountWithSameEmail: false
+  

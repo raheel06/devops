@@ -4,7 +4,7 @@ metadata:
   name: jenkins-devops-pvc
   namespace: devops
 spec:
-  storageClassName: nfs-client
+  storageClassName: nfs-share
   accessModes:
     - ReadWriteOnce
   resources:

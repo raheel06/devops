@@ -27,8 +27,6 @@ controller:
           scmCheckoutRetryCount: 0
           labelAtoms:
             - name: "kubernetes"
-            - name: "linux_deploy"
-            - name: "linux_ibmjdk_1.8"
             - name: "linux_openjdk_1.8"
             - name: "linux_openjdk_11"
             - name: "master"

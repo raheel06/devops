@@ -1,0 +1,171 @@
+# PersistentVolumeClaims for SQL Server
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mssql-pvc
+  namespace: devops
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-share
+  resources:
+    requests:
+      storage: 7Gi
+
+---
+# PersistentVolumeClaim for ProGet packages
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: proget-packages
+  namespace: devops
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-share
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# SQL Server Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inedo-sql
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inedo-sql
+  template:
+    metadata:
+      labels:
+        app: inedo-sql
+    spec:
+      priorityClassName: low-priority
+      nodeSelector:
+        node-role: devops
+      containers:
+        - name: mssql
+          image: mssql/server:2019-latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_SA_PASSWORD
+              value: "YourStrong!Passw0rd"
+            - name: MSSQL_PID
+              value: "Express"
+          volumeMounts:
+            - name: mssql-storage
+              mountPath: /var/opt/mssql
+      volumes:
+        - name: mssql-storage
+          persistentVolumeClaim:
+            claimName: mssql-pvc
+
+---
+# SQL Server Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: inedo-sql
+  namespace: devops
+spec:
+  selector:
+    app: inedo-sql
+  ports:
+    - protocol: TCP
+      port: 1433
+      targetPort: 1433
+---
+# ProGet Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proget
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proget
+  template:
+    metadata:
+      labels:
+        app: proget
+    spec:
+      priorityClassName: low-priority
+      nodeSelector:
+        node-role: devops
+      containers:
+        - name: proget
+          image: inedo/proget:25.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "2"
+          env:
+            - name: PROGET_SQL_CONNECTION_STRING
+              value: "Data Source=inedo-sql; Initial Catalog=ProGet; User ID=sa; Password=YourStrong!Passw0rd"
+            - name: TZ
+              value: "Asia/Dubai"
+          volumeMounts:
+            - name: proget-packages
+              mountPath: /var/proget/packages
+      volumes:
+        - name: proget-packages
+          persistentVolumeClaim:
+            claimName: proget-packages
+---
+# ProGet Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: proget-svc
+  namespace: devops
+spec:
+  type: ClusterIP
+  selector:
+    app: proget
+  ports:
+    - port: 80
+      targetPort: 80
+      #nodePort: 30650
+
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: proget-ingress
+  namespace: devops
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-body-size: 128m
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 512k
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: 512k
+
+spec:
+  #ingressClassName: nginx  # Adjust if your ingress controller uses a different class
+  rules:
+  - host: devops-proget.domain.com  # Replace with your actual domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: proget-svc
+            port:
+              number: 80
